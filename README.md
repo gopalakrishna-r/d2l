@@ -1,2 +1,2 @@
 # d2l
-Repo for solving lights out puzzle using deep learning
+companion repo for codebase http://d2l.ai./
