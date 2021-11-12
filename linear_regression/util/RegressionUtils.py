@@ -55,7 +55,6 @@ class Animator:
         display.display(self.fig)
         display.clear_output(wait=True)
         
-    
         
 class Updater():
     def __init__(self, params, lr) -> None:
