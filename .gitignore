@@ -1,3 +1,7 @@
 .vscode/settings.json
 linear_regression/util/__pycache__/
 Multilayer_perceptrons/Exercises/dropout/util/__pycache__/
+Multilayer_perceptrons/Exercises/dropout/dropout_losses_table.jpg
+.gitignore
+Multilayer_perceptrons/Exercises/dropout/losses.png
+Multilayer_perceptrons/Exercises/dropout/dropout_losses.jpg

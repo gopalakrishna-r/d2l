@@ -1,7 +1,6 @@
 from d2l import tensorflow as d2l
 import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
-import numpy as np
 import matplotlib.pyplot as plt
 from IPython import display
 
@@ -48,8 +47,11 @@ class Animator3D:
                 self.Y[i].append(b)
                 self.Z[i].append(c)
         self.axes.cla()
-        for x, y,z,fmt in zip(self.X, self.Y,self.Z, self.fmts):
+        labels = ['text{}'.format(i) for i in range(len(self.Z))]
+        for x, y,z,fmt, label in zip(self.X, self.Y,self.Z, self.fmts, labels):
             self.axes.plot(x, y, z, fmt)
+            #self.axes.text(x, y, z, label)
+           
         self.config_axes()
         display.display(self.fig)
         display.clear_output(wait=True)
@@ -69,7 +71,7 @@ class IteratorEx(object):
     def __iter__(self):
         while self.hasNext:
             yield self.next()    
-            
+
 def set_axes(axes, 
                  xlabel, ylabel, zlabel,
                  xlim, ylim, zlim, 
