@@ -5,3 +5,6 @@ Multilayer_perceptrons/Exercises/dropout/dropout_losses_table.jpg
 .gitignore
 Multilayer_perceptrons/Exercises/dropout/losses.png
 Multilayer_perceptrons/Exercises/dropout/dropout_losses.jpg
+Multilayer_perceptrons/data/kaggle_house_pred_test.csv
+Multilayer_perceptrons/data/kaggle_house_pred_train.csv
+Multilayer_perceptrons/kaggle/submission.csv
