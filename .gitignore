@@ -8,3 +8,11 @@ Multilayer_perceptrons/Exercises/dropout/dropout_losses.jpg
 Multilayer_perceptrons/data/kaggle_house_pred_test.csv
 Multilayer_perceptrons/data/kaggle_house_pred_train.csv
 Multilayer_perceptrons/kaggle/submission.csv
+Multilayer_perceptrons/dropout/dropout/dropout_losses_table.jpg
+Multilayer_perceptrons/dropout/dropout/dropout_losses.jpg
+Multilayer_perceptrons/dropout/dropout/losses.png
+Multilayer_perceptrons/dropout/dropout/util/__pycache__/Accumulator.cpython-37.pyc
+Multilayer_perceptrons/dropout/dropout/util/__pycache__/IteratorEx.cpython-37.pyc
+Multilayer_perceptrons/dropout/dropout/util/__pycache__/Metrics.cpython-37.pyc
+Multilayer_perceptrons/dropout/dropout/util/__pycache__/MLPutils.cpython-37.pyc
+Multilayer_perceptrons/dropout/dropout/util/__pycache__/RegressionUtils.cpython-37.pyc
