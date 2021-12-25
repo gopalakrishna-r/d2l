@@ -16,3 +16,9 @@ Multilayer_perceptrons/dropout/dropout/util/__pycache__/IteratorEx.cpython-37.py
 Multilayer_perceptrons/dropout/dropout/util/__pycache__/Metrics.cpython-37.pyc
 Multilayer_perceptrons/dropout/dropout/util/__pycache__/MLPutils.cpython-37.pyc
 Multilayer_perceptrons/dropout/dropout/util/__pycache__/RegressionUtils.cpython-37.pyc
+DL computation/checkpoint
+DL computation/mlp.params.index
+DL computation/x-file.npy
+DL computation/xy-files.npy
+DL computation/mydict.npy
+DL computation/mlp.params.data-00000-of-00001
