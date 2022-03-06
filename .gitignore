@@ -25,3 +25,10 @@ DL computation/mlp.params.data-00000-of-00001
 convolution/exercises/results_dir/
 logs
 object detection/
+*.pyc
+train_log/cifar_resnet/checkpoint
+*events.out.tfevents*
+*log.log*
+*.index
+*stats.json
+train_log/cifar_resnet/model-2000.data-00000-of-00001

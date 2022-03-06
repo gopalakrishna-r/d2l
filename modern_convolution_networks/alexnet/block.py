@@ -1,12 +1,7 @@
 import tensorflow as tf
-from d2l import tensorflow as d2l
-from tensorpack.models import  Conv2D, BatchNorm,MaxPooling, AvgPooling, FullyConnected,  Flatten, Dropout
+from tensorpack.models import  Conv2D, MaxPooling,  FullyConnected,  Flatten, Dropout
 from tensorpack.tfutils.argscope import argscope
 from tensorflow.keras import Input
-from tensorpack.tfutils.common import get_tf_version_tuple
-from tensorpack.tfutils.tower import get_current_tower_context
-from tensorpack.utils.argtools import graph_memoized
-from tensorpack.models.common import layer_register
 
 def alexnet():
     image = Input(shape=(224, 224, 1))
