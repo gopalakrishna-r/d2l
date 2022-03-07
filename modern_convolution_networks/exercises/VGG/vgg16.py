@@ -1,28 +1,30 @@
 
+import argparse
 import os
 import sys
-
-from tensorpack.tfutils.summary import add_moving_summary, add_param_summary
-from tensorpack.tfutils.common import get_global_step_var
-from tensorpack.models import (AvgPooling, BatchNorm, Conv2D, GlobalAvgPooling,
-                               nonlin)
-from tensorpack.tfutils.argscope import argscope
-from tensorpack.tfutils.sessinit import SmartInit
-from tensorpack.dataflow.regularize import regularize_cost
-from tensorpack.graph_builder.model_desc import ModelDesc
-from tensorpack.utils import logger
-from tensorpack.dataflow import dataset, imgaug, BatchData, AugmentImageComponent
-from tensorpack.train.config import TrainConfig
-from tensorpack.train import launch_train_with_config, SimpleTrainer
-from tensorpack.callbacks import ModelSaver, InferenceRunner, ScheduledHyperParamSetter, ScalarStats, ClassificationError
-from tensorpack.models import Conv2D, FullyConnected,  Dropout, MaxPooling
-from block import vgg_block
-import argparse
 from ast import parse
 
-
-
 import tensorflow as tf
+from tensorpack.callbacks import (ClassificationError, InferenceRunner,
+                                  ModelSaver, ScalarStats,
+                                  ScheduledHyperParamSetter)
+from tensorpack.dataflow import (AugmentImageComponent, BatchData, dataset,
+                                 imgaug)
+from tensorpack.dataflow.regularize import l2_regularizer, regularize_cost
+from tensorpack.graph_builder.model_desc import ModelDesc
+from tensorpack.models import (AvgPooling, BatchNorm, Conv2D, Dropout, Flatten,
+                               FullyConnected, GlobalAvgPooling, MaxPooling,
+                               nonlin)
+from tensorpack.tfutils.argscope import argscope
+from tensorpack.tfutils.common import get_global_step_var
+from tensorpack.tfutils.sessinit import SmartInit
+from tensorpack.tfutils.summary import add_moving_summary, add_param_summary
+from tensorpack.train import SimpleTrainer, launch_train_with_config
+from tensorpack.train.config import TrainConfig
+from tensorpack.utils import logger
+from tensorpack.input_source import QueueInput
+
+from block import vgg_block
 
 BATCH_SIZE = 32
 
@@ -32,47 +34,48 @@ class Model(ModelDesc):
         self.n = n
 
     def inputs(self):
-        return [tf.TensorSpec([None, 224, 224,1], tf.float32, 'input'),
+        return [tf.TensorSpec([None, 224, 224], tf.float32, 'input'),
                 tf.TensorSpec([None], tf.int32, 'label')]
 
     def build_graph(self, image, label):
         image = image / 128.0
+        l = tf.expand_dims(image, 3) * 2 - 1
         assert tf.test.is_gpu_available()
 
         def vgg_block(name, num_convs, num_channels, input):
             with tf.compat.v1.variable_scope(name):
-                with argscope(Conv2D, kernel_shape=3, padding = 'SAME',activation = tf.nn.relu, data_format = 'channels_last'):
-                    for i in range(num_convs):
-                        input = Conv2D(f'conv_{i+1}.0', input, num_channels)
-                    input = MaxPooling('maxpooling_1.0',input, pool_size=2, strides=2)
-                return input
+                for i in range(num_convs):
+                    input = Conv2D(f'{name}_conv_{i+1}.0', input, num_channels)
+                input = MaxPooling('maxpooling_1.0',input, pool_size=2, strides=2)
+            return input
 
-        with argscope([FullyConnected], units = 4096, activation=tf.nn.relu), \
-            argscope([Dropout], rate = 0.5):
-                convo_arch = [(2, 64), (2, 128), (3, 256), (3, 512), (3, 512)]
-                for i, pair in enumerate(convo_arch):
-                    l = vgg_block(f'layer_{i}_{pair[1]}',pair[0], pair[1], image)
+        with argscope([FullyConnected], units = 4096), \
+          argscope([FullyConnected, Conv2D], activation=tf.nn.relu), \
+            argscope([Conv2D, MaxPooling], data_format = 'channels_last'), \
+              argscope([Conv2D], kernel_size=3, padding = 'SAME'), \
+                argscope([Dropout], rate = 0.5):
+                    convo_arch = [(2, 64), (2, 128), (4, 256), (4, 512), (4, 512)]
+                    for i, pair in enumerate(convo_arch):
+                        l = vgg_block(f'layer_{i}_{pair[1]}',pair[0], pair[1], l)
                 #FCN
-                l = tf.keras.layers.Flatten()(l)
-                l = FullyConnected('fcn_1', l)
-                l = FullyConnected('fcn_2', l)
-        output = FullyConnected('fcn_3', l, units=10)
+                    l = Flatten('flatten', l)
+                    l = FullyConnected('fcn_1', l)
+                    l = FullyConnected('fcn_2', l)
+        logits = FullyConnected('fcn_3', l, units=10, activation = tf.nn.softmax)
                 
-        tf.nn.softmax(output, name='output')
-        
-        cost = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=label, logits=output)
+        cost = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=label)
         cost = tf.reduce_mean(cost, name='cross_entropy_loss')
-        wrong = tf.cast(tf.logical_not(tf.nn.in_top_k(label, output, 1)), tf.float32,  name='wrong_vector')
-        
-        add_moving_summary(tf.reduce_mean(wrong, name='train_error'))
-        wd_w = tf.compat.v1.train.exponential_decay(
-            0.0002, get_global_step_var(), 480000, 0.2, True)
-        wd_cost = tf.multiply(wd_w, regularize_cost(
-            '.*/W', tf.nn.l2_loss), name='wd_cost')
-        add_moving_summary(cost, wd_cost)
-        add_param_summary(('.*/W', ['histogram']))
-        return tf.add_n([cost, wd_cost], name='cost')
 
+        correct = tf.cast(tf.nn.in_top_k(predictions=logits, targets=label, k=1), tf.float32, name='correct')
+        # monitor training error
+        add_moving_summary(tf.reduce_mean(correct, name='accuracy'))
+
+        # weight decay on all W of fc layers
+        wd_cost = regularize_cost('fc.*/W', l2_regularizer(4e-4), name='regularize_loss')
+        add_moving_summary(cost, wd_cost)
+
+        return tf.add_n([cost, wd_cost], name='cost')
+    
     def optimizer(self):
         lr = tf.compat.v1.get_variable(
             'learning_rate', initializer=0.1, trainable=False)
@@ -99,12 +102,7 @@ if __name__ == '__main__':
     parser.add_argument('--load', help='load model for training')
     parser.add_argument('--logdir', help='log directory')
     args = parser.parse_args()
-    physical_devices = tf.config.list_physical_devices('GPU')
-    try:
-        tf.config.experimental.set_memory_growth(physical_devices[0], True)
-    except:
-    # Invalid device or cannot modify virtual devices once initialized.
-        pass
+   
     if args.gpu:
         os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
     if args.logdir:
@@ -115,17 +113,19 @@ if __name__ == '__main__':
     dataset_test = get_data('test')
     config = TrainConfig(
         model=Model(n=args.num_units),
-        dataflow=dataset_train,
+        dataflow=QueueInput(dataset_train),
         callbacks=[
-            ModelSaver(),
-            InferenceRunner(dataset_test, [
-                ScalarStats('cost'), ClassificationError('wrong_vector')
-            ]),
+            ModelSaver(),   # save the model after every epoch
+            InferenceRunner(    # run inference(for validation) after every epoch
+                dataset_test,   # the DataFlow instance used for validation
+                ScalarStats(    # produce `val_accuracy` and `val_cross_entropy_loss`
+                    ['cost', 'accuracy'], prefix='val')),
+            # MaxSaver needs to come after InferenceRunner to obtain its score
             ScheduledHyperParamSetter(
                 'learning_rate', [(1, 0.1), (32, 0.01), (48, 0.001)])
         ],
         steps_per_epoch=1000,
-        max_epoch=64,
+        max_epoch=5,
         session_init=SmartInit(args.load),
     )
     launch_train_with_config(config, SimpleTrainer())

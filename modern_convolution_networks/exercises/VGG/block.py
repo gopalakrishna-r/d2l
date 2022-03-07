@@ -18,7 +18,7 @@ def vgg(conv_arch):
     with argscope([FullyConnected], units = 4096, activation=tf.nn.relu), \
         argscope([Dropout], rate = 0.5):
         #FCN
-        l = Flatten('flatten', l)
+        l = tf.keras.layers.Flatten()( l)
         l = FullyConnected('fcn_1', l)
         l = Dropout('droput_1', l)
         l = FullyConnected('fcn_2', l)
@@ -37,7 +37,7 @@ def vgg16(conv_arch):
     with argscope([FullyConnected], units = 4096, activation=tf.nn.relu), \
         argscope([Dropout], rate = 0.5):
         #FCN
-        l = Flatten('flatten', l)
+        l = tf.keras.layers.Flatten()( l)
         l = FullyConnected('fcn_1', l)
         l = FullyConnected('fcn_2', l)
     output = FullyConnected('fcn_3', l, units=10, activation='softmax')

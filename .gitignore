@@ -11,11 +11,7 @@ Multilayer_perceptrons/kaggle/submission.csv
 Multilayer_perceptrons/dropout/dropout/dropout_losses_table.jpg
 Multilayer_perceptrons/dropout/dropout/dropout_losses.jpg
 Multilayer_perceptrons/dropout/dropout/losses.png
-Multilayer_perceptrons/dropout/dropout/util/__pycache__/Accumulator.cpython-37.pyc
-Multilayer_perceptrons/dropout/dropout/util/__pycache__/IteratorEx.cpython-37.pyc
-Multilayer_perceptrons/dropout/dropout/util/__pycache__/Metrics.cpython-37.pyc
-Multilayer_perceptrons/dropout/dropout/util/__pycache__/MLPutils.cpython-37.pyc
-Multilayer_perceptrons/dropout/dropout/util/__pycache__/RegressionUtils.cpython-37.pyc
+*.pyc
 DL computation/checkpoint
 DL computation/mlp.params.index
 DL computation/x-file.npy
@@ -31,4 +27,8 @@ train_log/cifar_resnet/checkpoint
 *log.log*
 *.index
 *stats.json
-train_log/cifar_resnet/model-2000.data-00000-of-00001
+train_log/cifar_resnet/model*
+modern_convolution_networks/exercises/VGG16/checkpoint
+train_log/vgg16/checkpoint
+train_log/vgg16/graph*
+train_log/vgg16/model*
