@@ -5,28 +5,29 @@ import sys
 from ast import parse
 
 import tensorflow as tf
-from tensorpack.callbacks import (ClassificationError, InferenceRunner,
-                                  ModelSaver, ScalarStats,
+from tensorpack.callbacks import ( InferenceRunner,
+                                  ModelSaver, ScalarStats, MaxSaver,
                                   ScheduledHyperParamSetter)
 from tensorpack.dataflow import (AugmentImageComponent, BatchData, dataset,
                                  imgaug)
 from tensorpack.dataflow.regularize import l2_regularizer, regularize_cost
 from tensorpack.graph_builder.model_desc import ModelDesc
-from tensorpack.models import (AvgPooling, BatchNorm, Conv2D, Dropout, Flatten,
-                               FullyConnected, GlobalAvgPooling, MaxPooling,
-                               nonlin)
-from tensorpack.tfutils.argscope import argscope
+
+from tensorpack.tfutils.argscope import argscope, enable_argscope_for_module
 from tensorpack.tfutils.common import get_global_step_var
 from tensorpack.tfutils.sessinit import SmartInit
 from tensorpack.tfutils.summary import add_moving_summary, add_param_summary
 from tensorpack.train import SimpleTrainer, launch_train_with_config
 from tensorpack.train.config import TrainConfig
 from tensorpack.utils import logger
-from tensorpack.input_source import QueueInput
+from tensorpack.compat import tfv1 as tf
+tfl = tf.layers
 
 from block import vgg_block
 
-BATCH_SIZE = 32
+enable_argscope_for_module(tf.layers)
+
+BATCH_SIZE = 16
 
 class Model(ModelDesc):
     def __init__(self, n):
@@ -45,36 +46,48 @@ class Model(ModelDesc):
         def vgg_block(name, num_convs, num_channels, input):
             with tf.compat.v1.variable_scope(name):
                 for i in range(num_convs):
-                    input = Conv2D(f'{name}_conv_{i+1}.0', input, num_channels)
-                input = MaxPooling('maxpooling_1.0',input, pool_size=2, strides=2)
-            return input
+                    input = tfl.conv2d( input, num_channels, name = f'{name}_conv_{i+1}.0',)
+                input = tfl.max_pooling2d(input, pool_size=2, strides=2,name = 'tfl.max_pooling2d_1.0',)
+                return input
 
-        with argscope([FullyConnected], units = 4096), \
-          argscope([FullyConnected, Conv2D], activation=tf.nn.relu), \
-            argscope([Conv2D, MaxPooling], data_format = 'channels_last'), \
-              argscope([Conv2D], kernel_size=3, padding = 'SAME'), \
-                argscope([Dropout], rate = 0.5):
+        with argscope([tfl.dense], units = 4096), \
+          argscope([tfl.dense, tfl.conv2d], activation=tf.nn.relu), \
+            argscope([tfl.conv2d, tfl.max_pooling2d], data_format = 'channels_last'), \
+              argscope([tfl.conv2d], kernel_size=3, padding = 'SAME'), \
+                argscope([tfl.dropout], rate = 0.5):
                     convo_arch = [(2, 64), (2, 128), (4, 256), (4, 512), (4, 512)]
                     for i, pair in enumerate(convo_arch):
                         l = vgg_block(f'layer_{i}_{pair[1]}',pair[0], pair[1], l)
                 #FCN
-                    l = Flatten('flatten', l)
-                    l = FullyConnected('fcn_1', l)
-                    l = FullyConnected('fcn_2', l)
-        logits = FullyConnected('fcn_3', l, units=10, activation = tf.nn.softmax)
+                    l = tfl.flatten( l, name = 'flatten', data_format = 'channels_last')
+                    l = tfl.dense( l, name = 'fcn_1',)
+                    l = tfl.dense(l, name = 'fcn_2', )
+                    logits = tfl.dense( l, units=10 , activation=tf.identity, name = 'fcn_3',)
                 
+        # a vector of length B with loss of each sample
         cost = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=label)
-        cost = tf.reduce_mean(cost, name='cross_entropy_loss')
+        cost = tf.reduce_mean(cost, name='cross_entropy_loss')  # the average cross-entropy loss
 
-        correct = tf.cast(tf.nn.in_top_k(predictions=logits, targets=label, k=1), tf.float32, name='correct')
-        # monitor training error
-        add_moving_summary(tf.reduce_mean(correct, name='accuracy'))
+        correct = tf.cast(tf.nn.in_top_k(logits, label, 1), tf.float32, name='correct')
+        accuracy = tf.reduce_mean(correct, name='accuracy')
 
-        # weight decay on all W of fc layers
-        wd_cost = regularize_cost('fc.*/W', l2_regularizer(4e-4), name='regularize_loss')
-        add_moving_summary(cost, wd_cost)
+        # This will monitor training error & accuracy (in a moving average fashion). The value will be automatically
+        # 1. written to tensosrboard
+        # 2. written to stat.json
+        # 3. printed after each epoch
+        add_moving_summary( accuracy)
 
-        return tf.add_n([cost, wd_cost], name='cost')
+        # Use a regex to find parameters to apply weight decay.
+        # Here we apply a weight decay on all W (weight matrix) of all fc layers
+        # If you don't like regex, you can certainly define the cost in any other methods.
+        wd_cost = tf.multiply(1e-5,
+                              regularize_cost('fc.*/kernel', tf.nn.l2_loss),
+                              name='regularize_loss')
+        total_cost = tf.add_n([wd_cost, cost], name='total_cost')
+        add_moving_summary(cost, wd_cost, total_cost)
+
+        
+        return total_cost
     
     def optimizer(self):
         lr = tf.compat.v1.get_variable(
@@ -102,7 +115,7 @@ if __name__ == '__main__':
     parser.add_argument('--load', help='load model for training')
     parser.add_argument('--logdir', help='log directory')
     args = parser.parse_args()
-   
+    
     if args.gpu:
         os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
     if args.logdir:
@@ -113,14 +126,15 @@ if __name__ == '__main__':
     dataset_test = get_data('test')
     config = TrainConfig(
         model=Model(n=args.num_units),
-        dataflow=QueueInput(dataset_train),
+        dataflow=dataset_train,
         callbacks=[
             ModelSaver(),   # save the model after every epoch
             InferenceRunner(    # run inference(for validation) after every epoch
                 dataset_test,   # the DataFlow instance used for validation
                 ScalarStats(    # produce `val_accuracy` and `val_cross_entropy_loss`
-                    ['cost', 'accuracy'], prefix='val')),
+                    ['cross_entropy_loss', 'accuracy'], prefix='val')),
             # MaxSaver needs to come after InferenceRunner to obtain its score
+            MaxSaver('validation_accuracy'),
             ScheduledHyperParamSetter(
                 'learning_rate', [(1, 0.1), (32, 0.01), (48, 0.001)])
         ],
