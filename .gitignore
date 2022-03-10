@@ -32,3 +32,6 @@ modern_convolution_networks/exercises/VGG16/checkpoint
 train_log/vgg16/checkpoint
 train_log/vgg16/graph*
 train_log/vgg16/model*
+*.meta
+train_log/NIN/checkpoint
+*.data*
