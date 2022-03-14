@@ -7,15 +7,23 @@ import tf_slim as slim
 from  tf_slim.layers import utils
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import variable_scope
+from keras_tuner import HyperParameters
 
 
 BATCH_SIZE = 128
 
-def build_graph():
+def build_graph(hp : HyperParameters):
         input_layer = tf.keras.Input(shape=(224, 224, 1), name='input')
         l = input_layer
         
-        channel_configs = [96, 256, 384, 10]
+        filters_1 = hp.Choice(name = 'filters_1', values = [90, 92, 94, 96, 100])
+        filters_2 = hp.Choice(name = 'filters_2', values = [64, 128, 256, 512])
+        learning_rate = hp.Choice('learning_rate', values=[1e-2, 1e-3, 1e-4])
+        
+        optimizer = tf.keras.optimizers.SGD(learning_rate)
+        loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+        
+        channel_configs = [filters_1, filters_2, 384, 10]
         kernel_size_configs = [11, 5, 3, 1]
         strides_configs = [4, 1, 1, 1]
         padding_configs = ['VALID', 'SAME', 'SAME', 'SAME']
@@ -30,7 +38,12 @@ def build_graph():
                 l =   reshape(name = 'reshape',target_shape = (1,1,10) )(l)
                 logits =  flatten(name = 'flatten')(l)
 
-        return tf.keras.Model(inputs=input_layer, outputs=logits)  
+        net = tf.keras.Model(inputs=input_layer, outputs=logits)  
+       
+        loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+        net.compile(optimizer=optimizer, loss=loss, metrics=['accuracy'])
+        
+        return net
 
 
 @slim.add_arg_scope

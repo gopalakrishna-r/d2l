@@ -35,3 +35,6 @@ train_log/vgg16/model*
 *.meta
 train_log/NIN/checkpoint
 *.data*
+
+*checkpoint*
+*.json
