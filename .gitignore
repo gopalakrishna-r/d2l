@@ -38,5 +38,5 @@ train_log/NIN/checkpoint
 
 *checkpoint*
 *.json
-.idea/d2l-2.iml
-.idea/modules.xml
+.idea/
+.idea/sonarlint
