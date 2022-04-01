@@ -1,8 +1,7 @@
-from warnings import filters
 import tensorflow as tf
-from tfutils.argumentscope.SlimUtils import flatten, dense, conv2d, max_pool2d, dropout
-from tf_slim import arg_scope, repeat
 from tensorflow.keras import Input
+from tf_slim import arg_scope
+from tfutils.argumentscope.SlimUtils import flatten, dense, conv2d, max_pool2d, dropout
 
 
 def alexnet():

@@ -1,6 +1,7 @@
 import tensorflow as tf
-from netowrkinnetwork import build_graph
 from d2l import tensorflow as d2l
+
+from netowrkinnetwork import build_graph
 
 net = build_graph()
 X = tf.random.uniform((1, 224, 224, 1))

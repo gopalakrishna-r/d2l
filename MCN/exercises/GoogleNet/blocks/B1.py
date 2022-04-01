@@ -1,12 +1,12 @@
-from tensorflow.keras.layers import MaxPool2D, Concatenate, Dense, Layer
+from tensorflow.keras.layers import Layer,MaxPool2D
+from tensorflow.keras import Model
+from ConvBNRelu import ConvBNRelu
 
-from ..ConvBNRelu import ConvBNRelu
 
-
-class InceptionBlk1(Layer):
+class Blk1(Layer):
     def __init__(self, name):
         super().__init__()
-        self.conv = ConvBNRelu(name=f'{name}_conv', filters=64, kernel_size=7, strides=2)
+        self.conv = ConvBNRelu(name=f'{name}_conv', filters=64, kernel_size=7, strides=2, padding='SAME')
         self.max_pool = MaxPool2D(name=f'{name}_max_pool', pool_size=3, strides=2, padding='SAME')
 
     def call(self, x, **kwargs):

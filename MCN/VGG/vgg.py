@@ -1,9 +1,9 @@
 import tensorflow as tf
 import tf_slim as slim
-from tfutils.argumentscope.SlimUtils import flatten, dense, conv2d, max_pool2d, dropout
-from tf_slim.layers import utils
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import variable_scope
+from tf_slim.layers import utils
+from tfutils.argumentscope.SlimUtils import flatten, dense, conv2d, max_pool2d, dropout
 
 tfl = tf.keras.layers
 

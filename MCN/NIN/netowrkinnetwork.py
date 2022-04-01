@@ -1,12 +1,9 @@
-import os
-import sys
-
-from tfutils.argumentscope.SlimUtils import reshape, conv2d, max_pool2d, dropout, globalAveragePooling2D, flatten
 import tensorflow as tf
 import tf_slim as slim
-from tf_slim.layers import utils
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import variable_scope
+from tf_slim.layers import utils
+from tfutils.argumentscope.SlimUtils import reshape, conv2d, max_pool2d, dropout, globalAveragePooling2D, flatten
 
 BATCH_SIZE = 128
 

@@ -1,5 +1,4 @@
 import tensorflow as tf
-from d2l import tensorflow as d2l
 
 
 def batch_norm(bridge_input, gamma, beta, moving_mean, moving_var, eps):
@@ -32,7 +31,7 @@ class BatchNorm(tf.keras.layers.Layer):
                                            initializer=tf.initializers.zeros, trainable=False)
         self.moving_variance = self.add_weight(name='moving_variance', shape=weight_shape,
                                                initializer=tf.initializers.ones, trainable=False)
-        super(BatchNorm, self).__init__(input_shape)
+        super(BatchNorm, self).build(input_shape)
 
     @tf.function
     def call(self, inputs, training):

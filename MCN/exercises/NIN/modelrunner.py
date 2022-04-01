@@ -1,8 +1,8 @@
-import tensorflow as tf
-from netowrkinnetwork import build_graph
-from d2l import tensorflow as d2l
 import keras_tuner as kt
-from  keras_tuner import HyperParameters as hp
+import tensorflow as tf
+from d2l import tensorflow as d2l
+
+from netowrkinnetwork import build_graph
 
 num_epochs, batch_size =  10, 128
 train_iter, test_iter = d2l.load_data_fashion_mnist(batch_size, resize=224)

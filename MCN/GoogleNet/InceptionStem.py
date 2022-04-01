@@ -1,11 +1,9 @@
 import tensorflow as tf
-from d2l import tensorflow as d2l
-from tfutils.argumentscope import conv2d, max_pool2d, dense, globalAveragePooling2D, flatten
 import tf_slim as slim
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import variable_scope
-from keras_tuner import HyperParameters
 from tf_slim.layers import utils
+from tfutils.argumentscope import conv2d, max_pool2d, dense, global_avg_pool_2d, flatten
 
 BATCH_SIZE = 128
 
@@ -98,7 +96,7 @@ def build_graph():
         l = slim.stack(l, build_inception, build_configs(inception_block_cofigs['b4']), scope='B4_inception')
         l = max_pool2d(name='b4_max_pool')(l)
         l = slim.stack(l, build_inception, build_configs(inception_block_cofigs['b5']), scope='B5_inception')
-        l = globalAveragePooling2D(name='gap')(l)
+        l = global_avg_pool_2d(name='gap')(l)
         l = flatten()(l)
         l = dense(name='dense', units=10)(l)
     return tf.keras.Model(inputs=input_layer, outputs=l)

@@ -1,5 +1,4 @@
 import tensorflow as tf
-import tensorflow.keras as keras
 from d2l import tensorflow as d2l
 
 from vgg16 import vgg16
