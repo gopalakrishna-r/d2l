@@ -57,16 +57,16 @@ class IteratorEx(object):
     def __init__(self, it):
         self.it = iter(it)
         self.sentinel = object()
-        self.nextItem = next(self.it, self.sentinel)
-        self.hasNext = self.nextItem is not self.sentinel
+        self.next_item = next(self.it, self.sentinel)
+        self.has_next = self.next_item is not self.sentinel
 
     def next(self):
-        ret, self.nextItem = self.nextItem, next(self.it, self.sentinel)
-        self.hasNext = self.nextItem is not self.sentinel
+        ret, self.next_item = self.next_item, next(self.it, self.sentinel)
+        self.has_next = self.next_item is not self.sentinel
         return ret
 
     def __iter__(self):
-        while self.hasNext:
+        while self.has_next:
             yield self.next()    
 
 def set_axes(axes, 
