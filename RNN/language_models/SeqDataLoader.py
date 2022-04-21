@@ -12,3 +12,8 @@ class SeqDataLoader:
 
     def __iter__(self):
         return self.data_iter_fn(self.corpus, self.batch_size, self.num_steps)
+
+
+def load_data_time_machine(batch_size, num_steps, use_random_iter=False, max_tokens=10000):
+    data_iter = SeqDataLoader(batch_size, num_steps, use_random_iter, max_tokens)
+    return data_iter, data_iter.vocab
