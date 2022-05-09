@@ -1,9 +1,10 @@
+import matplotlib.pyplot as plt
+import tensorflow as tf
+from d2l import tensorflow as d2l
+
 from RNN.text_preprocessing.DataReader import read_time_machine
 from RNN.text_preprocessing.Tokenizer import tokenize
 from RNN.text_preprocessing.Vocabulary import Vocab
-from d2l import tensorflow as d2l
-import matplotlib.pyplot as plt
-import tensorflow as tf
 
 
 def load_corpus_time_machine(min_frequencies, max_tokens=-1):

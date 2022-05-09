@@ -1,5 +1,5 @@
-import tf_slim as slim
 import tensorflow as tf
+import tf_slim as slim
 
 
 # initializing the model parameters

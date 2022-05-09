@@ -1,7 +1,8 @@
+import matplotlib.pyplot as plt
 import tensorflow as tf
 from d2l import tensorflow as d2l
-import matplotlib.pyplot as plt
-from model_fns import get_net, train, mse_loss
+
+from model_fns import  train
 
 T = 1000
 time = tf.range(1, T + 1, dtype=tf.float32)
@@ -19,7 +20,7 @@ batch_size, n_train = 16, 600
 train_iter = d2l.load_array((features[:n_train], labels[:n_train]), batch_size, is_train=True)
 
 net = get_net()
-train(net, train_iter, 5, 0.01)
+train(net, train_iter, 5)
 
 one_step_prediction = net(features)
 d2l.plot([time, time[tau:]], [X.numpy(), one_step_prediction.numpy()], 'time',

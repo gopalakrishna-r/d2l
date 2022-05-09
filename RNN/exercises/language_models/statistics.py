@@ -1,9 +1,9 @@
-import random
-import tensorflow as tf
-from d2l import tensorflow as d2l
-import matplotlib.pyplot as plt
+import os
 import re
-import os, hashlib, requests, json
+import requests
+
+import matplotlib.pyplot as plt
+from d2l import tensorflow as d2l
 
 # Suppose there are 10000 words in the training dataset.
 # How much word frequency and multi-word adjacent frequency does a four-gram need to store?

@@ -1,7 +1,8 @@
+import matplotlib.pyplot as plt
 import tensorflow as tf
 from d2l import tensorflow as d2l
-import matplotlib.pyplot as plt
-from model_fns import get_net, train, mse_loss
+
+from model_fns import get_net, train
 
 T = 1000
 time = tf.range(1, T + 1, dtype=tf.float32)

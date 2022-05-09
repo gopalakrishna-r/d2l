@@ -1,8 +1,8 @@
-from d2l import tensorflow as d2l
 import tensorflow as tf
-from predictor import predict_ch8
+from d2l import tensorflow as d2l
 
 from gradientclipper import gradient_clipping
+from predictor import predict_ch8
 
 
 def train_epoch_ch8(net, train_iter, loss, updater, use_random_iter):

@@ -1,7 +1,6 @@
-from tensorflow.keras.layers import Layer,AvgPool2D, MaxPool2D, Concatenate
-from tensorflow.keras import Model
+from tensorflow.keras.layers import Layer, AvgPool2D, MaxPool2D, Concatenate
 
-from ConvBNRelu import ConvBNRelu
+from MCN.exercises.GoogleNet.ConvBNRelu import ConvBNRelu
 
 
 class Stem(Layer):

@@ -3,6 +3,11 @@ from d2l import tensorflow as d2l
 
 mse_loss = tf.keras.losses.MeanSquaredError()
 
+def get_net():
+    net = tf.keras.Sequential([tf.keras.layers.Dense(10, activation='relu'),
+                              tf.keras.layers.Dense(1)])
+    return net
+
 
 def compute_loss_grads(m_input, y, net):
     with tf.GradientTape() as tape:
@@ -12,7 +17,7 @@ def compute_loss_grads(m_input, y, net):
     return loss, grads
 
 
-def train(net, train_iter, epochs, lr):
+def train(net, train_iter, epochs):
     trainer = tf.keras.optimizers.Adam()
     for epoch in range(epochs):
         for X, y in train_iter:

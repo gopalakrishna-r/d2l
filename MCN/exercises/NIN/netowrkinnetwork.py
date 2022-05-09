@@ -4,7 +4,7 @@ from keras_tuner import HyperParameters
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import variable_scope
 from tf_slim.layers import utils
-from tfutils.argumentscope.SlimUtils import reshape, conv2d, max_pool2d, dropout, globalAveragePooling2D, flatten
+from tfutils.argumentscope.SlimUtils import reshape, conv2d, max_pool2d, dropout, flatten, global_avg_pool_2d
 
 BATCH_SIZE = 128
 
@@ -35,7 +35,7 @@ def build_graph(hp: HyperParameters):
         l = slim.stack(l, nin_block, [(f'nin_block_{len(nin_stem_configs) - 1}', nin_stem_configs[-1][0],
                                        nin_stem_configs[-1][1], nin_stem_configs[-1][2], nin_stem_configs[-1][3],
                                        nin_stem_configs[-1][4])])
-        l = globalAveragePooling2D(name='gap')(l)
+        l = global_avg_pool_2d(name='gap')(l)
         l = reshape(name='reshape', target_shape=(1, 1, 10))(l)
         logits = flatten(name='flatten')(l)
 

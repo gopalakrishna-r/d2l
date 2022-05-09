@@ -1,7 +1,5 @@
-import tensorboard
 import tensorflow as tf
 from d2l import tensorflow as d2l
-from pathlib import Path
 
 from Inception import build_graph
 

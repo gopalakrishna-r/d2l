@@ -1,12 +1,10 @@
-import numpy as np
-import tensorflow as tf
 import keras_tuner as kt
-from d2l import tensorflow as d2l
+import tensorflow as tf
 import tensorflow.keras as keras
-from gradientclipper import gradient_clipping
 import tf_slim as slim
-import numpy as np
-from functools import partial
+from d2l import tensorflow as d2l
+
+from gradientclipper import gradient_clipping
 
 
 class RNNModel(keras.models.Model):
@@ -16,10 +14,10 @@ class RNNModel(keras.models.Model):
         self.init_state, self.forward_fn = init_state, forward_fn
         self.trainable_vars = get_params(vocab_size, num_hiddens)
 
-    def __call__(self, X, state):
-        X = tf.one_hot(tf.transpose(X), self.vocab_size)
-        X = tf.cast(X, tf.float32)
-        return self.forward_fn(X, state, self.trainable_vars)
+    def __call__(self, inputs, state):
+        inputs = tf.one_hot(tf.transpose(inputs), self.vocab_size)
+        inputs = tf.cast(inputs, tf.float32)
+        return self.forward_fn(inputs, state, self.trainable_vars)
 
     def begin_state(self, batch_size, *args, **kwargs):
         return self.init_state(batch_size, self.num_hiddens)
@@ -61,6 +59,7 @@ def rnn(inputs, state, params):
 
 class RNNHyperModel(kt.HyperModel):
     def __init__(self, vocab_size, use_random_iter=False):
+        super().__init__()
         self.vocab_size = vocab_size
         self.use_random_iter = use_random_iter
 

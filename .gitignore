@@ -42,4 +42,5 @@ train_log/NIN/checkpoint
 .idea/sonarlint
 *.pb
 *json*
-*.pb
+*.wandb
+**/*wandb*/**
