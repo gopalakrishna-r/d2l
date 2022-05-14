@@ -15,9 +15,9 @@ def get_params(vocab_size, num_hiddens):
 
         # hidden state weights
         with slim.arg_scope([slim.model_variable], shape=[num_hiddens, num_hiddens]):
-            Whr = slim.model_variable(name="Wxr")  # reset gate
-            Whz = slim.model_variable(name="Wxz")  # update gate
-            Whh = slim.model_variable(name="Wxh")  # candidate hidden gate
+            Whr = slim.model_variable(name="Whr")  # reset gate
+            Whz = slim.model_variable(name="Whz")  # update gate
+            Whh = slim.model_variable(name="Whh")  # candidate hidden gate
 
         # biases
         with slim.arg_scope([slim.model_variable], shape=[num_hiddens], initializer=tf.zeros_initializer()):

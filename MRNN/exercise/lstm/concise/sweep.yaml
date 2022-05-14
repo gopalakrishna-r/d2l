@@ -1,0 +1,31 @@
+name : rnn-hyperparameter-lstm-sweeps
+program: runner.py
+method: grid
+metric:
+  goal: minimize
+  name: perplexity
+parameters:
+  batch_size:
+    values: 
+    - 32
+    - 64
+    - 128
+    - 256
+  learning_rate:
+    values: 
+    - 1.0
+    - 0.1
+    - 0.01
+  hidden_units:
+    values:
+      - 128
+      - 256
+      - 512
+      - 768
+      - 1024
+early_terminate:
+  type: hyperband
+  s: 2
+  eta: 3
+  max_iter: 100
+
