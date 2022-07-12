@@ -3,7 +3,7 @@ import tensorflow as tf
 
 def init_lstm_state(num_hiddens, batch_size):
     return (tf.zeros(shape=(batch_size, num_hiddens)),
-            tf.zeros(shape = (batch_size, num_hiddens)))
+            tf.zeros(shape=(batch_size, num_hiddens)))
 
 
 def lstm(inputs, state, parameters):

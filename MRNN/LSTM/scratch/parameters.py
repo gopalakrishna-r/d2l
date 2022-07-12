@@ -1,5 +1,5 @@
-import tf_slim as slim
 import tensorflow as tf
+import tf_slim as slim
 
 
 def get_lstm_parameters(num_hiddens, vocab_size):

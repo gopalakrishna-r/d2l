@@ -1,5 +1,6 @@
 import tensorflow as tf
 from d2l import tensorflow as d2l
+
 from model import lstm, init_lstm_state
 from parameters import get_lstm_parameters
 

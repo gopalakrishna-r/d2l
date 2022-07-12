@@ -1,6 +1,6 @@
+import matplotlib.pyplot as plt
 import tensorflow as tf
 from d2l import tensorflow as d2l
-import matplotlib.pyplot as plt
 
 from MRNN.gru.scratch.model import init_gru_state, gru
 from MRNN.gru.scratch.parameters import get_params
@@ -13,7 +13,7 @@ strategy = tf.distribute.OneDeviceStrategy(device_name)
 
 num_epochs, lr = 500, 1
 with strategy.scope():
-    model = d2l.RNNModelScratch(len(vocab),num_hiddens, init_gru_state, gru, get_params)
+    model = d2l.RNNModelScratch(len(vocab), num_hiddens, init_gru_state, gru, get_params)
 
 d2l.train_ch8(model, train_iter, vocab, lr, num_epochs, strategy)
 plt.show()

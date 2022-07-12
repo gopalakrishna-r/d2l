@@ -65,7 +65,7 @@ class RNNHyperModel(kt.HyperModel):
                     y_hat, state = model(X, state)
                     y = tf.reshape(tf.transpose(Y), (-1))
                     l = loss(y, y_hat)
-                params = model.trainable_variables
+                params = model.trainable_vars
                 gradients = g.gradient(l, params)
                 gradients = d2l.grad_clipping(gradients, 1)
                 updater.apply_gradients(zip(gradients, params))

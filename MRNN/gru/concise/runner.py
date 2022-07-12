@@ -1,7 +1,7 @@
+import matplotlib.pyplot as plt
 import tensorflow as tf
 from d2l import tensorflow as d2l
 from d2l.tensorflow import train_ch8
-import matplotlib.pyplot as plt
 
 batch_size, num_steps = 32, 35
 train_iter, vocab = d2l.load_data_time_machine(batch_size, num_steps)
@@ -14,7 +14,7 @@ gru_layer = tf.keras.layers.RNN(gru_cell, time_major=True, return_state=True, re
 
 num_epochs, lr = 500, 1
 with strategy.scope():
-    model = d2l.RNNModel(gru_layer, vocab_size = len(vocab))
+    model = d2l.RNNModel(gru_layer, vocab_size=len(vocab))
 
 train_ch8(model, train_iter, vocab, lr, num_epochs, strategy)
 plt.show()

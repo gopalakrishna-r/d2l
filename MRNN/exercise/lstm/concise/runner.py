@@ -1,14 +1,12 @@
 import tensorflow as tf
-import wandb
 from d2l import tensorflow as d2l
-from d2l.tensorflow import train_ch8
+
+import wandb
+
 
 # Adjust the hyperparameters and analyze their influence on
 # running time, perplexity, and the output sequence.
 
-import tensorflow as tf
-from d2l import tensorflow as d2l
-import matplotlib.pyplot as plt
 
 def build_rnn_model(config):
     lstm_cell = tf.keras.layers.LSTMCell(config.hidden_units, kernel_initializer="glorot_uniform")

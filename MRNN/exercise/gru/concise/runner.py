@@ -1,7 +1,7 @@
 import tensorflow as tf
-import wandb
+import MRNN.exercise.BRNN.model
 from d2l import tensorflow as d2l
-from d2l.tensorflow import train_ch8
+
 
 # Adjust the hyperparameters and analyze their influence on
 # running time, perplexity, and the output sequence.

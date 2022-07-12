@@ -1,6 +1,7 @@
+import matplotlib.pyplot as plt
 import tensorflow as tf
 from d2l import tensorflow as d2l
-import matplotlib.pyplot as plt
+
 batch_size, num_steps = 32, 35
 train_iter, vocab = d2l.load_data_time_machine(batch_size, num_steps)
 

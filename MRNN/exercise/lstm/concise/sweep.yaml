@@ -1,4 +1,4 @@
-name : rnn-hyperparameter-lstm-sweeps
+name: rnn-hyperparameter-lstm-sweeps
 program: runner.py
 method: grid
 metric:
@@ -6,16 +6,16 @@ metric:
   name: perplexity
 parameters:
   batch_size:
-    values: 
-    - 32
-    - 64
-    - 128
-    - 256
+    values:
+      - 32
+      - 64
+      - 128
+      - 256
   learning_rate:
-    values: 
-    - 1.0
-    - 0.1
-    - 0.01
+    values:
+      - 1.0
+      - 0.1
+      - 0.01
   hidden_units:
     values:
       - 128
