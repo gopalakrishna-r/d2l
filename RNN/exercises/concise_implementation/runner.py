@@ -1,5 +1,5 @@
-from d2l import tensorflow as d2l
 import keras_tuner as kt
+from d2l import tensorflow as d2l
 
 from model import RNNHyperModel
 

@@ -1,5 +1,4 @@
 import tensorflow as tf
-import MRNN.exercise.BRNN.model
 from d2l import tensorflow as d2l
 
 

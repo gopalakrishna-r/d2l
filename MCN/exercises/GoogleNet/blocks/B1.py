@@ -1,6 +1,7 @@
-from tensorflow.keras.layers import Layer,MaxPool2D
-from tensorflow.keras import Model
+from tensorflow.keras.layers import Layer, MaxPool2D
+
 from MCN.exercises.GoogleNet.ConvBNRelu import ConvBNRelu
+
 
 class Blk1(Layer):
     def __init__(self, name):

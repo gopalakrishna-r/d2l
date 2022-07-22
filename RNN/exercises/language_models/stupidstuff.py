@@ -1,8 +1,9 @@
-from lxml import html
-import requests
 import json
 import logging
 import re
+
+import requests
+from lxml import html
 
 re_category_rating = re.compile(r"\s*Category: (.*[A-z])\s*Rating: (.*\d)\s*")
 

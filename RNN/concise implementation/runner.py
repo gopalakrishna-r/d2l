@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import tensorflow.keras as keras
 from d2l import tensorflow as d2l
-import keras_tuner as kt
+
 from model import RNNOutputLayer
 
 batch_size = 32

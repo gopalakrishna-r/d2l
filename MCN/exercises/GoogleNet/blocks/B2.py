@@ -1,4 +1,5 @@
 from tensorflow.keras.layers import Layer, MaxPool2D
+
 from MCN.exercises.GoogleNet.ConvBNRelu import ConvBNRelu
 
 

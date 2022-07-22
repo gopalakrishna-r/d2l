@@ -1,6 +1,7 @@
 from typing import Tuple, Optional, overload
+
 import tensorflow as tf
-from tensorflow import Tensor, nest
+from tensorflow import Tensor
 
 import RNNBase
 
@@ -67,7 +68,7 @@ class LSTM(RNNBase):
         is_batched = input.dim() == 3
         batch_dim = 0 if self.batch_first else 1
         if not is_batched:
-            input = tf.expand_dims(input,batch_dim)
+            input = tf.expand_dims(input, batch_dim)
         max_batch_size = input.size(0) if self.batch_first else input.size(1)
         sorted_indices = None
         unsorted_indices = None
@@ -75,14 +76,16 @@ class LSTM(RNNBase):
         if hx is None:
             num_directions = 2 if self.bidirectional else 1
             real_hidden_size = self.proj_size if self.proj_size > 0 else self.hidden_size
-            h_zeros = tf.reshape((), self.num_layers * num_directions,
-                                 max_batch_size, real_hidden_size)
-            c_zeros = tf.reshape((), (self.num_layers * num_directions,
-                                      max_batch_size, self.hidden_size))
+            h_zeros = tf.Variable(self.kernel_initializer(shape=(self.num_layers * num_directions,
+                                                                 max_batch_size, real_hidden_size)),
+                                  trainable=True)
+            c_zeros = tf.Variable(self.kernel_initializer(shape=(self.num_layers * num_directions,
+                                                                 max_batch_size, self.hidden_size)),
+                                  trainable=True)
             hx = (h_zeros, c_zeros)
         else:
             if is_batched:
-                if (hx[0].dim() != 3 or hx[1].dim() != 3):
+                if hx[0].dim() != 3 or hx[1].dim() != 3:
                     msg = ("For batched 3-D input, hx and cx should "
                            f"also be 3-D but got ({hx[0].dim()}-D, {hx[1].dim()}-D) tensors")
                     raise RuntimeError(msg)
@@ -98,43 +101,42 @@ class LSTM(RNNBase):
             hx = permute_hidden(hx, sorted_indices)
 
         self.check_forward_args(input, hx, batch_sizes)
-        if batch_sizes is None:
-            result = _VF.lstm(input, hx, self._flat_weights, self.bias, self.num_layers,
-                              self.dropout, self.training, self.bidirectional, self.batch_first)
-        else:
-            result = _VF.lstm(input, batch_sizes, hx, self._flat_weights, self.bias,
-                              self.num_layers, self.dropout, self.training, self.bidirectional)
+        result = _VF.lstm(input, hx, self._flat_weights, self.bias, self.num_layers,
+                          self.dropout, self.training, self.bidirectional, self.batch_first)
+
         output = result[0]
         hidden = result[1:]
         # xxx: isinstance check needs to be in conditional for TorchScript to compile
-        if isinstance(orig_input, PackedSequence):
-            output_packed = PackedSequence(output, batch_sizes, sorted_indices, unsorted_indices)
-            return output_packed, permute_hidden(hidden, unsorted_indices)
-        else:
-            if not is_batched:
-                output = output.squeeze(batch_dim)
-                hidden = (hidden[0].squeeze(1), hidden[1].squeeze(1))
-            return output, permute_hidden(hidden, unsorted_indices)
+        # if isinstance(orig_input, PackedSequence):
+        #     output_packed = PackedSequence(output, batch_sizes, sorted_indices, unsorted_indices)
+        #     return output_packed, permute_hidden(hidden, unsorted_indices)
+        # else:
+        if not is_batched:
+            output = output.squeeze(batch_dim)
+            hidden = (hidden[0].squeeze(1), hidden[1].squeeze(1))
+        return output, permute_hidden(hidden, unsorted_indices)
 
-    def _generate_zero_filled_state_for_cell(cell, inputs, batch_size, dtype):
-        if inputs is not None:
-            batch_size = tf.shape(inputs)[0]
-            dtype = inputs.dtype
-        return _generate_zero_filled_state(batch_size, cell.state_size, dtype)
 
-    def _generate_zero_filled_state(batch_size_tensor, state_size, dtype):
-        """Generate a zero filled tensor with shape [batch_size, state_size]."""
-        if batch_size_tensor is None or dtype is None:
-            raise ValueError(
-                'batch_size and dtype cannot be None while constructing initial state. '
-                f'Received: batch_size={batch_size_tensor}, dtype={dtype}')
+def _generate_zero_filled_state_for_cell(cell, inputs, batch_size, dtype):
+    if inputs is not None:
+        batch_size = tf.shape(inputs)[0]
+        dtype = inputs.dtype
+    return _generate_zero_filled_state(batch_size, cell.state_size, dtype)
 
-        def create_zeros(unnested_state_size):
-            flat_dims = tf.TensorShape(unnested_state_size).as_list()
-            init_state_size = [batch_size_tensor] + flat_dims
-            return tf.zeros(init_state_size, dtype=dtype)
 
-        if tf.nest.is_nested(state_size):
-            return tf.nest.map_structure(create_zeros, state_size)
-        else:
-            return create_zeros(state_size)
+def _generate_zero_filled_state(batch_size_tensor, state_size, dtype):
+    """Generate a zero filled tensor with shape [batch_size, state_size]."""
+    if batch_size_tensor is None or dtype is None:
+        raise ValueError(
+            'batch_size and dtype cannot be None while constructing initial state. '
+            f'Received: batch_size={batch_size_tensor}, dtype={dtype}')
+
+    def create_zeros(unnested_state_size):
+        flat_dims = tf.TensorShape(unnested_state_size).as_list()
+        init_state_size = [batch_size_tensor] + flat_dims
+        return tf.zeros(init_state_size, dtype=dtype)
+
+    if tf.nest.is_nested(state_size):
+        return tf.nest.map_structure(create_zeros, state_size)
+    else:
+        return create_zeros(state_size)

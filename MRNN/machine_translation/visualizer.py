@@ -1,6 +1,5 @@
-from d2l import tensorflow as d2l
-
 import matplotlib.pyplot as plt
+from d2l import tensorflow as d2l
 
 
 def show_list_len_pair_hist(legend, xlabel, ylabel, xlist, ylist):

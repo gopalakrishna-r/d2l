@@ -28,6 +28,7 @@ class LSTMCell(keras.layers.Layer):
         self.state_size = [self.units, self.units]
         self.output_size = self.units
 
+
     def build(self, input_shape):
         input_dim = input_shape[-1]
         self.kernel = tf.Variable(self.kernel_initializer(shape=(input_dim, self.units * 4)),

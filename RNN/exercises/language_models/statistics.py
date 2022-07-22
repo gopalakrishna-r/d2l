@@ -1,8 +1,8 @@
 import os
 import re
-import requests
 
 import matplotlib.pyplot as plt
+import requests
 from d2l import tensorflow as d2l
 
 # Suppose there are 10000 words in the training dataset.

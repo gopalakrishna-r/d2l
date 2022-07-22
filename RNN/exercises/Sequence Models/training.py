@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from d2l import tensorflow as d2l
 
-from model_fns import  train
+from model_fns import train, get_net
 
 T = 1000
 time = tf.range(1, T + 1, dtype=tf.float32)

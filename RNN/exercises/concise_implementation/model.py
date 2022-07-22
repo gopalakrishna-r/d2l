@@ -1,6 +1,6 @@
+import keras_tuner as kt
 import tensorflow as tf
 import tensorflow.keras as keras
-import keras_tuner as kt
 from d2l import tensorflow as d2l
 
 

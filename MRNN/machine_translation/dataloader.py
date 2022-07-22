@@ -1,32 +1,43 @@
-import os
-
+import tensorflow as tf
 from d2l import tensorflow as d2l
 
-from MRNN.machine_translation.preprocessor import preprocess_nmt, build_array_nmt
-from MRNN.machine_translation.tokenizer import tokenize_nmt
+from MRNN.machine_translation.MTFraEng import MTFraEng
 
 d2l.DATA_HUB['fra-eng'] = (d2l.DATA_URL + 'fra-eng.zip',
                            '94646ad1522d915e7b0f9296181140edcf86a4f5')
 
 
-def read_data_nmt():
-    data_dir = d2l.download_extract('fra-eng')
-    with open(os.path.join(data_dir, 'fra.txt'), 'r') as f:
+@d2l.add_to_class(MTFraEng)
+def _download(self):
+    d2l.extract(d2l.download(
+        d2l.DATA_URL + 'fra-eng.zip', self.root,
+        '94646ad1522d915e7b0f9296181140edcf86a4f5'))
+    with open(self.root + '/fra-eng/fra.txt', encoding='utf-8') as f:
         return f.read()
 
 
-def load_data_nmt(batch_size, num_steps, num_examples = 600):
-    text = preprocess_nmt(read_data_nmt())
-    source, target = tokenize_nmt(text, num_examples)
-    src_vocab = d2l.Vocab(source, reserved_tokens=['<pad>', '<eos>', '<bos>'], min_freq=2)
-    target_vocab = d2l.Vocab(target, reserved_tokens=['<pad>', '<eos>', '<bos>'], min_freq=2)
-    print(f'vocab length for source {len(src_vocab)} and target {len(target_vocab)} for num_examples : {num_examples}')
-    src_array, src_valid_len = build_array_nmt(source, src_vocab, num_steps)
-    target_array, target_valid_len = build_array_nmt(target, target_vocab, num_steps)
-    data_arrays = (src_array, src_valid_len, target_array, target_valid_len)
-    data_iter = d2l.load_array(data_arrays, batch_size)
-    return data_iter, src_vocab, target_vocab
+@d2l.add_to_class(MTFraEng)
+def _build_arrays(self, raw_text, src_vocab=None, tgt_vocab=None):
+    def _build_array(sentences, vocab, is_tgt=False):
+        pad_or_trim = \
+            lambda seq, t: (seq[:t] if len(seq) > t else seq + ['<pad>'] * (t - len(seq)))
+        sentences = [pad_or_trim(s, self.num_steps) for s in sentences]
+        if is_tgt:
+            sentences = [['<bos>'] + s for s in sentences]
+        if vocab is None:
+            vocab = d2l.Vocab(sentences, min_freq=2)
+        array = tf.constant([vocab[s] for s in sentences])
+        valid_len = tf.reduce_sum(tf.cast(array != vocab['<pad>'], tf.int32), 1)
+        return array, vocab, valid_len
+
+    src, tgt = self._tokenize(self._preprocess(raw_text), self.num_train + self.num_val)
+
+    src_array, src_vocab, src_valid_len = _build_array(src, src_vocab)
+    tgt_array, tgt_vocab, _ = _build_array(tgt, tgt_vocab, True)
+    return (src_array, tgt_array[:, :-1], src_valid_len, tgt_array[:, 1:]), src_vocab, tgt_vocab
 
 
-for examples in [200, 400, 600, 800, 1000 ]:
-    load_data_nmt(batch_size= 2, num_steps=8, num_examples=examples)
+@d2l.add_to_class(MTFraEng)
+def get_dataloader(self, train):
+    idx = slice(0, self.num_train) if train else slice(self.num_train, None)
+    return self.get_tensorloader(self.arrays, train, idx)

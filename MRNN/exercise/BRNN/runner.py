@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import tensorflow as tf
 from d2l import tensorflow as d2l
-
 from model.LSTMCell import LSTMCell
+
 from model.StackedRNNCell import StackedRNNCells
 
 batch_size, num_steps = 32, 35
